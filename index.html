@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1110">
+  <title>Бамбук | Калькулятор стоимости</title>
+  <style>
+    :root { --bg:#08100f; --surface:#101b19; --surface-2:#172521; --line:#29423a; --text:#eef7f0; --muted:#9ab0a5; --accent:#b7f34a; --accent-2:#61d69b; --danger:#ff8a7a; --shadow:0 14px 30px rgba(0,0,0,.34); }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; min-width:320px; color:var(--text); background:radial-gradient(circle at 10% 0%,#1b3b2f 0,transparent 35%),var(--bg); font:15px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    button,input,select,textarea { font:inherit; }
+    button { cursor:pointer; border:0; color:#09120e; font-weight:800; }
+    .app { max-width:780px; margin:auto; padding:18px 14px 40px; }
+    header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:18px; }
+    .eyebrow { color:var(--accent); text-transform:uppercase; letter-spacing:.12em; font-size:11px; font-weight:900; }
+    h1,h2,h3,p { margin:0; } h1 { font-size:clamp(27px,8vw,42px); line-height:1; margin-top:5px; letter-spacing:-.04em; } h2 { font-size:19px; } h3 { font-size:15px; margin-bottom:8px; }
+    .header-mark { width:46px; height:46px; border-radius:16px; background:linear-gradient(145deg,#d8ff72,#4aaf75); box-shadow:inset 0 2px 1px #fff8,0 9px 22px #75e45d33; display:grid; place-items:center; font-size:25px; }
+    .card { background:linear-gradient(145deg,#162520dd,#0e1816e8); border:1px solid var(--line); border-radius:22px; padding:17px; margin:12px 0; box-shadow:var(--shadow); }
+    .card-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:13px; } .hint { color:var(--muted); font-size:12px; }
+    textarea,input,select { width:100%; border:1px solid #335247; background:#0b1513; color:var(--text); border-radius:13px; padding:12px 13px; outline:none; transition:.2s ease; }
+    textarea { min-height:105px; resize:vertical; } input:focus,select:focus,textarea:focus { border-color:var(--accent-2); box-shadow:0 0 0 3px #61d69b1c; }
+    label { display:block; color:var(--muted); font-size:12px; font-weight:700; margin:0 0 6px; } .field { margin-bottom:12px; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .grid-3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:10px; } .actions .primary { grid-column:1/-1; }
+    .btn { min-height:46px; padding:11px 13px; border-radius:14px; background:linear-gradient(145deg,#d8ff6c,#86d854); box-shadow:inset 0 2px 1px #ffffff8c,0 7px 0 #3a7e42,0 12px 23px #72e15d24; transition:transform .18s,box-shadow .18s,filter .18s; } .btn:hover { filter:brightness(1.08); box-shadow:inset 0 2px 1px #ffffffa8,0 7px 0 #3a7e42,0 0 20px #a9ff654d; } .btn:active { transform:translateY(5px); box-shadow:inset 0 2px 1px #ffffff66,0 2px 0 #3a7e42; } .btn.secondary { background:linear-gradient(145deg,#273d35,#1a2a25); color:var(--text); box-shadow:inset 0 1px 1px #ffffff1c,0 5px 0 #07100d; } .btn.danger { background:linear-gradient(145deg,#ff8c82,#d94c4c); color:#fff; box-shadow:inset 0 2px 1px #ffffff66,0 7px 0 #812b32,0 12px 23px #d94c4c24; } .btn.small { min-height:38px; padding:8px 10px; font-size:12px; }
+    .segmented { display:flex; gap:8px; padding:4px; border-radius:15px; background:#0b1513; border:1px solid var(--line); } .segmented label { flex:1; margin:0; color:var(--muted); text-align:center; cursor:pointer; } .segmented input { display:none; } .segmented span { display:block; border-radius:11px; padding:9px 5px; } .segmented input:checked+span { background:var(--accent); color:#0b1510; }
+    .switchline,.checkline { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #29423a66; } .switchline:last-child,.checkline:last-child { border-bottom:0; } .switchline input,.checkline input { width:19px; height:19px; accent-color:var(--accent); } .switchline span,.checkline span { flex:1; } .price { color:var(--accent); white-space:nowrap; font-size:12px; }
+    .range-row { display:grid; grid-template-columns:1fr 86px; gap:10px; align-items:center; } input[type=range] { accent-color:var(--accent); padding:0; } .range-value { text-align:right; color:var(--accent); font-weight:900; }
+    .hidden { display:none !important; } .subtle { color:var(--muted); } .pill { background:#b7f34a18; border:1px solid #b7f34a55; color:var(--accent); padding:5px 8px; border-radius:999px; font-size:11px; font-weight:800; }
+    .result { border-color:#78d98399; background:linear-gradient(145deg,#183329,#10231c); } .total { font-size:34px; font-weight:950; color:var(--accent); letter-spacing:-.04em; } .result-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:14px 0; } .metric { background:#0b1713aa; border:1px solid #315345; border-radius:14px; padding:10px; } .metric b { display:block; font-size:18px; margin-top:2px; } .metric small { color:var(--muted); }
+    .client-card { margin-top:0; } .wall-row { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:end; margin-bottom:10px; } .wall-row .field { margin:0; } .wall-actions { display:flex; gap:8px; } .status-line { color:var(--accent); font-size:12px; min-height:18px; margin-top:8px; } .history-item { padding:12px 0; border-bottom:1px solid #29423a66; cursor:pointer; } .history-item:last-child { border-bottom:0; } .history-item b { color:var(--accent); } .sticky-total { position:fixed; z-index:4; left:50%; bottom:0; transform:translateX(-50%); width:min(780px,100%); padding:9px 14px calc(9px + env(safe-area-inset-bottom)); background:#0b1513ee; backdrop-filter:blur(14px); border-top:1px solid var(--accent-2); display:flex; justify-content:space-between; align-items:center; gap:12px; box-shadow:0 -10px 30px #0008; } .sticky-total small { color:var(--muted); } .sticky-total strong { color:var(--accent); font-size:21px; }
+    .warning { margin-top:12px; padding:11px 12px; border-radius:12px; background:#ff8a7a1a; border:1px solid #ff8a7a66; color:#ffc1b8; } .ok { color:var(--accent-2); } footer { color:var(--muted); text-align:center; font-size:12px; padding:18px 8px; }
+    .modal-backdrop { position:fixed; inset:0; background:#000b; display:grid; place-items:end center; padding:14px; z-index:5; } .modal { width:min(620px,100%); background:#14221e; border:1px solid var(--line); border-radius:22px; padding:18px; box-shadow:0 20px 60px #000b; } .modal p { color:var(--muted); margin:8px 0 16px; } .modal .modal-fields { display:grid; gap:10px; margin:14px 0; } .modal .modal-fields input { margin:0; } .modal .actions .btn { box-shadow:inset 0 2px 1px #ffffff8c,0 7px 0 #3a7e42,0 12px 23px #72e15d24; } .tooltip-container { position:relative; display:inline-flex; } .tooltip-text { position:absolute; bottom:calc(100% + 12px); left:50%; width:max-content; max-width:240px; transform:translateX(-50%) translateY(5px); padding:9px 12px; border:1px solid #49685a; border-radius:11px; background:#07100e; color:var(--text); font-size:12px; line-height:1.3; text-align:center; box-shadow:0 10px 25px #0009; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .2s ease,transform .2s ease,visibility .2s ease; z-index:8; } .tooltip-text::after { content:""; position:absolute; left:50%; top:100%; transform:translateX(-50%); border:7px solid transparent; border-top-color:#49685a; } .tooltip-container:hover .tooltip-text, .tooltip-container:focus-within .tooltip-text, .tooltip-container:active .tooltip-text { opacity:1; visibility:visible; transform:translateX(-50%) translateY(0); } .release-btn:hover { opacity:1; color:var(--text); border-color:#5b806d; }
+
+    body.light-theme { --bg:#f4f7f5; --surface:#ffffff; --surface-2:#eef5f0; --line:#c9d8cf; --text:#17221d; --muted:#5f7168; --accent:#3e8f35; --accent-2:#19895d; --shadow:0 14px 30px rgba(31,67,48,.14); background:linear-gradient(145deg,#ffffff,#edf5ef); }
+    body.light-theme .card { background:linear-gradient(145deg,#ffffff,#f1f7f3); }
+    body.light-theme textarea,body.light-theme input,body.light-theme select { background:#fff; color:var(--text); border-color:#b7cdc0; }
+    body.light-theme .segmented,body.light-theme .metric { background:#f4f9f6; }
+    body.light-theme .result { background:linear-gradient(145deg,#f4fff5,#e9f7ed); }
+    body.light-theme .panel-preview,body.light-theme [class*="preview"] { border:1px solid #aebfb4; box-shadow:0 4px 12px #456c5630; }
+    .manager-select { min-width:118px; max-width:145px; padding:9px 10px; font-size:12px; }
+    .logo-wrap { display:flex; align-items:center; gap:8px; }
+    .copy-phone { min-width:44px; padding:10px 12px; }
+    .discount-warning { color:#ff6b6b; font-weight:800; font-size:12px; margin-top:6px; display:none; }
+    .discount-warning.visible { display:block; }
+    .panel-print-preview { width:100%; height:34px; border-radius:10px; margin:10px 0; background:linear-gradient(110deg,#b87d54,#e1b581 42%,#6e4437 75%,#d09b6c); border:1px solid #8f6b53; box-shadow:inset 0 1px 4px #fff6,0 2px 8px #0003; }
+    .custom-panel-preview { width:100%; max-height:140px; object-fit:contain; border-radius:10px; margin-top:8px; background:#0b1512; }
+    .price-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; padding:12px; margin:12px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface-2); }
+    .price-form .full { grid-column:1/-1; }
+    .history-tools { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+    @media print { .panel-print-preview { display:block !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; } .manager-select,.copy-phone,.history-tools,.new-client-btn { display:none !important; } }
+    body.light-theme .btn.secondary { color:#17221d; background:linear-gradient(145deg,#ffffff,#dfeae3); box-shadow:inset 0 1px 1px #ffffff,0 5px 0 #a9bdb0; }
+    body.light-theme .sticky-total { background:#ffffffee; color:#17221d; border-top-color:#19895d; box-shadow:0 -10px 30px #456c5630; }
+    body.light-theme .sticky-total small { color:#5f7168; }
+    body.light-theme .sticky-total strong { color:#176b43; }
+    .measure-warning { color:#ff4d4d !important; animation:measurePulse 1.25s ease-in-out infinite; font-weight:900; }
+    @keyframes measurePulse { 0%,100% { opacity:1; text-shadow:0 0 0 #ff4d4d; } 50% { opacity:.55; text-shadow:0 0 12px #ff4d4d; } }
+    .app-logo { width:120px; height:auto; min-height:54px; object-fit:contain; border-radius:12px; background:transparent; border:0; box-shadow:none; }
+    .header-tools { display:flex; align-items:center; gap:8px; }
+    .settings-btn { width:43px; height:43px; border:1px solid var(--line); border-radius:14px; background:var(--surface-2); color:var(--text); font-size:20px; box-shadow:inset 0 1px 1px #ffffff33,0 5px 0 #07100d55; }
+    .price-table-wrap { max-height:52vh; overflow:auto; border:1px solid var(--line); border-radius:14px; }
+    .price-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .price-table th,.price-table td { padding:7px; border-bottom:1px solid #29423a66; text-align:left; vertical-align:middle; }
+    .price-table th { position:sticky; top:0; background:#14221e; color:var(--accent); z-index:1; }
+    .price-table input { min-width:84px; padding:7px; border-radius:9px; }
+    .photo-preview { display:none; margin-top:10px; max-width:100%; max-height:280px; border-radius:14px; border:1px solid var(--line); object-fit:contain; background:#07100e; }
+    .photo-preview.visible { display:block; }
+    .pdf-meta { margin-top:14px; padding-top:12px; border-top:1px solid #315345; font-size:12px; }
+    .pdf-contact { margin-top:8px; color:var(--muted); }
+    @media print { .app-logo { display:block !important; width:120px; height:62px; } .pdf-meta { display:block !important; } .photo-preview.visible { display:block !important; max-height:360px; page-break-inside:avoid; } }
+    .theme-toggle { width:43px; height:43px; border:1px solid var(--line); border-radius:14px; background:var(--surface-2); color:var(--text); font-size:20px; box-shadow:inset 0 1px 1px #ffffff33,0 5px 0 #07100d55; }
+    .prep-notes { margin-top:12px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; color:var(--muted); font-size:12px; }
+    .actions > .tooltip-container { display:flex; width:100%; }
+    .actions > .tooltip-container > .btn { width:100%; }
+    .tooltip-container.tooltip-visible .tooltip-text { opacity:1; visibility:visible; transform:translateX(-50%) translateY(0); }
+    .ai-progress { margin-top:12px; padding:12px; border:1px solid var(--line); border-radius:14px; background:var(--surface-2); color:var(--text); }
+    .ai-progress-head { display:flex; justify-content:space-between; gap:10px; align-items:center; font-size:13px; font-weight:800; }
+    .ai-progress-head strong { color:var(--accent); font-variant-numeric:tabular-nums; }
+    .ai-progress-track { height:9px; margin-top:9px; overflow:hidden; border-radius:999px; background:#07100e; border:1px solid var(--line); }
+    .ai-progress-fill { height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg,var(--accent-2),var(--accent)); transition:width .12s linear; }
+    .ai-progress-note { margin-top:7px; color:var(--muted); font-size:12px; }
+    .ai-progress-working { display:flex; align-items:center; gap:10px; min-height:26px; font-weight:800; }
+    .ai-spinner { flex:none; width:20px; height:20px; border:3px solid #61d69b44; border-top-color:var(--accent); border-radius:50%; animation:aiSpin .8s linear infinite; }
+    .ai-progress-done { color:var(--accent-2); font-weight:800; }
+    @keyframes aiSpin { to { transform:rotate(360deg); } }
+    body.light-theme .ai-progress-track { background:#e5eee8; }
+    @media print { .ai-progress { display:none !important; } }
+
+    @media print { @page { size:A4; margin:10mm; } *,body,body.light-theme { color:#111 !important; background:#fff !important; box-shadow:none !important; text-shadow:none !important; } body { min-width:0; font-size:10px; line-height:1.25; } .app { max-width:none; padding:0; } header { margin-bottom:6px; } .app-logo { width:90px !important; min-height:0; } .card { background:#fff !important; border:1px solid #bbb !important; page-break-inside:avoid; border-radius:8px; padding:8px; margin:5px 0; } .app > section:not(.result), .app > .two-col, .sticky-total, .actions, .theme-toggle, .settings-btn, .header-mark, .manager-select, footer { display:none !important; } .result { display:block !important; page-break-inside:avoid; } .result-grid { gap:4px; margin:6px 0; } .metric { padding:5px; } .metric b { font-size:12px; } .total { font-size:24px; } .pdf-meta { margin-top:7px; padding-top:6px; } .panel-print-preview { height:24px; margin:5px 0; } .photo-preview.visible { max-height:180px; display:block !important; } .subtle,.hint,.metric small { color:#444 !important; } .total,.price,.eyebrow { color:#111 !important; } }
+    @media (min-width:650px) { .app { padding-top:30px; } .two-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start; } .two-col .card { margin:0 0 12px; } }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header><div class="logo-wrap"><img class="app-logo" id="appLogo" src="data:image/webp;base64,UklGRm4AAABXRUJQVlA4IGIAAADQCACdASrIAH0APpVKo02lpCMiIEgAsBKJaW7hdgEbQBPa9FXCDIIaqk122i4QZBDVUmu20XCDIIaqk122i4QZBDVUmu20XCDIIaqk10AAAP7+0pb9B8XL/6S6XFoAAAAAAA==" alt="Логотип forone.kz"><div><div class="eyebrow">Предварительный просчет</div><h1>Бамбук<span style="color:var(--accent)">.</span></h1><p class="subtle">Калькулятор панелей для мобильного телефона</p></div></div><div class="header-tools"><select id="managerSelect" class="manager-select" aria-label="Менеджер"><option>Менеджер 1</option><option>Менеджер 2</option><option>Менеджер 3</option><option>Менеджер 4</option><option>Менеджер 5</option></select><button class="theme-toggle" id="themeToggle" type="button" aria-label="Переключить тему">🌙</button><button class="settings-btn" id="priceSettingsBtn" type="button" aria-label="Управление ценами">⚙️</button><div class="header-mark">竹</div></div></header>
+  <section class="card client-card"><div class="grid"><div class="field"><label for="clientName">Имя клиента</label><input id="clientName" type="text" placeholder="Например, Айдос"></div><div class="field"><label for="clientPhone">Телефон</label><div class="wall-actions"><input id="clientPhone" type="tel" placeholder="+7 ___ ___ __ __"><button type="button" class="btn small secondary copy-phone" id="copyPhoneBtn" title="Скопировать телефон">📋</button></div></div><div class="field"><label for="clientPhone2">Телефон 2</label><input id="clientPhone2" type="tel" placeholder="+7 ___ ___ __ __"></div><div class="field"><label for="clientStatus">Статус клиента</label><select id="clientStatus"><option>Новый</option><option>Думает</option><option>Согласен</option><option>Оплатил</option></select></div></div><button type="button" class="btn secondary small new-client-btn" id="newClientBtn" style="margin-top:10px">＋ Новый клиент</button></section>
+
+  <section class="card">
+    <div class="card-head"><h2>Быстрый ввод</h2><span class="pill">офлайн</span></div>
+    <label for="description">Вставьте описание объекта</label>
+    <textarea id="description" placeholder="Например: Стена 2.8 на 2.9, окно 1.2х1.2"></textarea>
+    <div class="actions"><button class="btn secondary" id="voiceBtn">🎙 Голосовой ввод</button><span class="tooltip-container" data-longpress-tooltip><button class="btn secondary" id="fileBtn" type="button" aria-describedby="fileTooltip">📄 Загрузить файл</button><span class="tooltip-text" id="fileTooltip" role="tooltip">Загрузите текстовый файл или голосовое сообщение клиента: MP3, M4A, WAV, AAC или OGG.</span></span><input id="fileInput" type="file" accept=".txt,.mp3,.m4a,.wav,.aac,.ogg,text/plain,audio/*" class="hidden"><span class="tooltip-container"><button class="btn secondary" id="assistantBtn" aria-describedby="assistantTooltip">🧭 Помощник</button><span class="tooltip-text" id="assistantTooltip" role="tooltip">Нажми на кнопку получишь результат</span></span><span class="tooltip-container" data-longpress-tooltip><button class="btn secondary" id="aiBtn" type="button" aria-describedby="aiTooltip">✨ Интерактивный ИИ</button><span class="tooltip-text" id="aiTooltip" role="tooltip">ИИ поможет разобрать голосовое сообщение или выделить размеры и параметры из введённого текста.</span></span><button class="btn primary" id="calculateBtn">Рассчитать стоимость</button><button class="btn danger" id="resetBtn">Сбросить данные</button><button class="btn secondary" id="historyBtn">История</button></div>
+    <div id="aiProgress" class="ai-progress hidden" role="status" aria-live="polite"></div>
+  </section>
+
+  <div class="two-col">
+    <section class="card">
+      <div class="card-head"><h2>Параметры объекта</h2></div>
+      <div class="field"><label>Вариант расчета</label><div class="segmented"><label><input type="radio" name="calcMode" value="floor" checked><span>По полу</span></label><label><input type="radio" name="calcMode" value="wall"><span>По стенам</span></label></div></div>
+      <div class="field"><label for="surfaceType">Тип поверхности</label><select id="surfaceType"><option>Стена</option><option>Потолок</option><option>Дверь</option><option>Другое</option></select></div>
+      <div class="field"><button type="button" class="btn secondary small" id="photoBtn">📷 Прикрепить фото стены</button><input id="photoInput" type="file" accept="image/*" class="hidden"><input id="photoCameraInput" type="file" accept="image/*" capture="environment" class="hidden"><div id="photoPdfTitle" class="subtle hidden" style="margin-top:8px"><b>Фото объекта</b></div><img id="photoPreview" class="photo-preview" alt="Фото объекта"><div id="photoStatus" class="hint" style="margin-top:7px"></div></div>
+      <div class="field" id="floorField"><label for="floorArea">Площадь пола, м²</label><input id="floorArea" type="number" min="0" step="0.01" placeholder="0"></div>
+      <div id="wallFields" class="hidden"><div id="wallList"><div class="wall-row" data-wall-id="1"><div class="field"><label for="wallLength">Стена 1 · длина L, м</label><input id="wallLength" type="number" min="0" step="0.01" placeholder="0"></div><div class="field"><label for="wallHeight">Высота H, м</label><input id="wallHeight" type="number" min="0" step="0.01" placeholder="0"></div><div class="wall-actions"><button type="button" class="btn small secondary remove-wall hidden">×</button></div></div></div><button type="button" class="btn small secondary" id="addWallBtn">+ Добавить стену</button></div>
+      <div class="grid"><div class="field"><label for="windows">Окон, шт.</label><div class="wall-actions"><input id="windows" type="number" min="0" step="1" placeholder="0"><button type="button" class="btn small secondary" id="standardWindowBtn">+ Стандарт</button></div></div><div class="field"><label for="doors">Дверей, шт.</label><div class="wall-actions"><input id="doors" type="number" min="0" step="1" placeholder="0"><button type="button" class="btn small secondary" id="standardDoorBtn">+ Стандарт</button></div></div></div>
+      <div class="grid"><div class="field"><label for="windowPerimeter">Периметр окна, м</label><input id="windowPerimeter" type="number" min="0" step="0.1" placeholder="0"></div><div class="field"><label for="doorPerimeter">Периметр двери, м</label><input id="doorPerimeter" type="number" min="0" step="0.1" placeholder="0"></div></div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Материалы</h2><label class="switchline" style="padding:0;border:0"><input id="partnerMode" type="checkbox"><span>Партнерские цены</span></label></div>
+      <div class="field"><label for="panelSelect">Панель</label><select id="panelSelect"></select><div id="panelPrice" class="hint" style="margin-top:7px"></div></div>
+      <div class="field"><label for="shadeSelect">Оттенок</label><select id="shadeSelect"><option>Светлый</option><option>Тёмный</option><option>Нейтральный</option></select></div>
+      <div class="field"><label for="louverSelect">Луверы (опционально)</label><select id="louverSelect"><option value="">Не добавлять</option></select><div id="louverPrice" class="hint" style="margin-top:7px"></div></div>
+      <label class="checkline"><input type="checkbox" id="autoMaterials"><span>Автоматически рассчитать луверы и профили (по площади)</span><b class="price">Авто</b></label>
+      <h3>Профили и доп. позиции</h3>
+      <label class="checkline"><input type="checkbox" id="innerCorner"><span>Внутренний угловой</span><b class="price" data-price="innerCorner"></b></label>
+      <label class="checkline"><input type="checkbox" id="outerCorner"><span>Наружный угловой</span><b class="price" data-price="outerCorner"></b></label>
+      <label class="checkline"><input type="checkbox" id="lProfile"><span>Г-образный</span><b class="price" data-price="lProfile"></b></label>
+      <label class="checkline"><input type="checkbox" id="led"><span>Светодиодная лента</span><b class="price">Уточняется</b></label>
+    </section>
+  </div>
+
+  <section class="card">
+    <div class="card-head"><h2>Монтаж и дополнительные услуги</h2><span class="hint">отметьте нужное</span></div>
+    <div id="services"></div>
+    <div class="grid" style="margin-top:10px"><div class="field"><label for="liftHours">Подъем материала, часов</label><input id="liftHours" type="number" min="0" step="1" placeholder="0"><label class="checkline" style="margin-top:6px"><input id="hasLift" type="checkbox"><span>Есть лифт</span></label></div><div class="field"><label for="radialAngles">Радиальные углы, шт.</label><input id="radialAngles" type="number" min="0" step="1" placeholder="0"></div></div>
+    <label class="checkline"><input type="checkbox" id="hiddenLouverDoor"><span>Обшивка луверами двери скрытого монтажа</span><b class="price measure-warning">Требуется замер</b></label>
+  </section>
+
+
+  <section class="card" id="prepCard"><div class="card-head"><h2>⚠️ Подготовка объекта</h2><span class="hint">чек-лист</span></div><label class="checkline"><input type="checkbox" id="prepElectrician"><span>Вызван электрик (снятие розеток)</span></label><label class="checkline"><input type="checkbox" id="prepPlumber"><span>Вызван сантехник (снятие смесителей)</span></label><label class="checkline"><input type="checkbox" id="prepWalls"><span>Стены очищены и прогрунтованы</span></label></section>
+  <section class="card">
+    <div class="card-head"><h2>Настройки стоимости</h2></div>
+    <div class="field"><label>Скидка</label><div class="range-row"><input id="discount" type="range" min="0" max="100" value="0"><output id="discountOut" class="range-value">0%</output></div><div id="discountWarning" class="discount-warning">⚠️ Скидка &gt;15%. Требуется согласование РОПа</div></div>
+    <div class="field"><label>Запас на подрезку</label><div class="range-row"><input id="waste" type="range" min="0" max="30" value="0"><output id="wasteOut" class="range-value">0%</output></div></div>
+    <div class="field"><label>НДС</label><div class="range-row"><input id="vat" type="range" min="0" max="16" value="16"><output id="vatOut" class="range-value">16%</output></div></div>
+    <div class="field"><label>Доставка</label><div class="range-row"><input id="delivery" type="range" min="15000" max="30000" step="1000" value="15000"><output id="deliveryOut" class="range-value">15 000 тг</output></div></div>
+  </section>
+
+  <section class="card result" id="resultCard">
+    <div class="card-head"><h2>Итог расчета</h2><span id="resultStatus" class="pill">готов к расчету</span></div>
+    <div class="total" id="total">0 тг</div><div class="subtle">с учетом скидки, НДС и доставки</div>
+    <div class="result-grid"><div class="metric"><small>Площадь</small><b id="outArea">—</b></div><div class="metric"><small>Панели</small><b id="outPanels">—</b></div><div class="metric"><small>Соединительный профиль</small><b id="outJoin">—</b></div><div class="metric"><small>Завершающий профиль</small><b id="outEnd">—</b></div><div class="metric"><small>Клей</small><b id="outGlue">—</b></div><div class="metric"><small>Окна / двери</small><b id="outOpenings">—</b></div></div>
+    <div id="panelPrintPreview" class="panel-print-preview" aria-label="Превью панели для PDF"></div><div id="pdfPhotoSection" class="hidden"><b>Фото объекта</b><br><img id="pdfPhotoImage" class="photo-preview visible" alt="Фото объекта"></div><div id="pdfDetails" class="subtle"></div><div id="breakdown" class="subtle"></div><div id="prepNotes" class="prep-notes"></div><div id="minWarning"></div><div class="pdf-meta"><div id="pdfContext"></div><b>Срок действия предложения: 3 дня</b><div class="pdf-contact">Сайт: forone.kz · Email: forone.kz@yandex.kz<br>Алматы: +7 708 911 4298 · Астана: +7 701 006 5468</div></div>
+    <div class="actions"><button class="btn" id="copyBtn">Скопировать расчет</button><button class="btn secondary" id="whatsappBtn">Отправить в WhatsApp</button><button class="btn secondary" id="invoiceBtn" style="display:none">Выставить счет</button><button class="btn secondary" id="printBtn">Сохранить PDF</button></div>
+  </section>
+  <footer>Предварительный расчет. Точная стоимость — после замера.<br><small>Версия 2.0 (09.11.2026)</small></footer>
+<div class="sticky-total"><small>Итоговая сумма</small><strong id="stickyTotal">0 тг</strong></div>
+</div>
+
+<div id="modalRoot" class="hidden"></div>
+<script>
+'use strict';
+let invoiceRequested = false;
+const AI_CONFIG = {
+  enabled: true,
+  serverUrl: new URLSearchParams(window.location.search).get('aiServer') ||
+    ((window.location.protocol === 'file:' || window.location.hostname.endsWith('github.io')) ? 'http://localhost:3000' : '')
+};
+let aiProgressTimer = null;
+function aiEndpoint() {
+  const base = (AI_CONFIG.serverUrl || window.location.origin).replace(/\/+$/, '');
+  return `${base}/api/ai`;
+}
+function setAIProgress(mode, percent = 0) {
+  const box = $('aiProgress');
+  if (!box) return;
+  box.className = 'ai-progress';
+  if (mode === 'upload') {
+    const value = Math.max(0, Math.min(100, Math.round(percent)));
+    box.innerHTML = `<div class="ai-progress-head"><span>Загрузка аудиофайла</span><strong>${value}%</strong></div><div class="ai-progress-track" role="progressbar" aria-label="Загрузка аудиофайла" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${value}"><div class="ai-progress-fill" style="width:${value}%"></div></div><div class="ai-progress-note">Файл отправляется на сервер для распознавания.</div>`;
+  } else if (mode === 'working') {
+    box.innerHTML = '<div class="ai-progress-working"><span class="ai-spinner" aria-hidden="true"></span><span>Нейросеть распознаёт...</span></div><div class="ai-progress-note">Это может занять несколько секунд.</div>';
+  } else if (mode === 'done') {
+    box.className = 'ai-progress ai-progress-done';
+    box.textContent = 'Готово. Текст добавлен в описание.';
+    clearTimeout(aiProgressTimer);
+    aiProgressTimer = setTimeout(() => { box.className = 'ai-progress hidden'; }, 5000);
+  } else {
+    box.className = 'ai-progress hidden';
+    box.textContent = '';
+  }
+}
+function callAI({ text, file }) {
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open('POST', aiEndpoint(), true);
+    request.timeout = 180000;
+    request.upload.addEventListener('progress', event => {
+      if (file && event.lengthComputable) setAIProgress('upload', event.loaded / event.total * 100);
+    });
+    request.upload.addEventListener('load', () => setAIProgress('working'));
+    request.onload = () => {
+      let data = {};
+      try { data = JSON.parse(request.responseText || '{}'); } catch (e) {}
+      if (request.status >= 200 && request.status < 300) return resolve(data);
+      reject({ status: request.status, data });
+    };
+    request.onerror = () => reject({ network: true });
+    request.ontimeout = () => reject({ network: true, timeout: true });
+    if (file) {
+      const form = new FormData();
+      form.append('audio', file, file.name);
+      request.send(form);
+    } else {
+      request.setRequestHeader('Content-Type', 'application/json');
+      request.send(JSON.stringify({ text }));
+    }
+  });
+}
+function showAIError(error, isAudio = false) {
+  setAIProgress('idle');
+  if (error?.status === 429 || error?.data?.error === 'AI_LIMIT') {
+    openModal('Лимит ИИ на сегодня исчерпан', 'Лимит ИИ на сегодня исчерпан. Пожалуйста, введите данные вручную или используйте кнопку «Голосовой ввод» (микрофон).');
+  } else if (error?.network || error?.status === 503) {
+    openModal('Сервер ИИ недоступен', 'Не удалось подключиться к серверу ИИ. Проверьте подключение к интернету и запуск server.js. Пожалуйста, введите данные вручную или используйте кнопку «Голосовой ввод» (микрофон).');
+  } else if (error?.empty) {
+    openModal('Не удалось разобрать речь', 'Не удалось разобрать речь. Попробуйте еще раз или введите текст вручную.');
+  } else if (error?.status === 413) {
+    openModal('Файл слишком большой', error?.data?.message || 'Максимальный размер аудиофайла — 14 МБ.');
+  } else if (error?.status === 415) {
+    openModal('Формат не поддерживается', error?.data?.message || 'Поддерживаются MP3, M4A, WAV, AAC и OGG.');
+  } else {
+    const fallback = isAudio ? 'Не удалось разобрать речь. Попробуйте еще раз или введите текст вручную.' : 'Не удалось обработать текст. Попробуйте еще раз или продолжите вручную.';
+    openModal('Не удалось получить ответ от ИИ', error?.data?.message || fallback);
+  }
+}
+async function runAIRequest({ text = '', file = null }) {
+  setAIProgress(file ? 'upload' : 'working', 0);
+  try {
+    const response = await callAI({ text, file });
+    const result = String(response?.text || '').trim();
+    if (!result || /^(EMPTY|NO_SPEECH|\[NO SPEECH\])$/i.test(result)) throw { empty: true };
+    $('description').value = result;
+    parseText();
+    setAIProgress('done');
+  } catch (error) {
+    showAIError(error, Boolean(file));
+  }
+}
+function runAIForTypedText() {
+  const text = $('description').value.trim();
+  if (!text) {
+    openModal('Интерактивный ИИ', 'Сначала введите описание объекта в поле выше. Для распознавания голосового сообщения используйте кнопку «Загрузить файл».');
+    return;
+  }
+  runAIRequest({ text });
+}
+function transcribeAudioFile(file) {
+  if (file.size > 14 * 1024 * 1024) {
+    showAIError({ status: 413, data: { message: 'Максимальный размер аудиофайла — 14 МБ.' } }, true);
+    return;
+  }
+  runAIRequest({ file });
+}
+function initLongPressTooltips() {
+  document.querySelectorAll('[data-longpress-tooltip]').forEach(container => {
+    let pressTimer;
+    let hideTimer;
+    const hide = () => {
+      clearTimeout(pressTimer);
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => container.classList.remove('tooltip-visible'), 1800);
+    };
+    container.addEventListener('touchstart', () => {
+      clearTimeout(pressTimer);
+      clearTimeout(hideTimer);
+      pressTimer = setTimeout(() => container.classList.add('tooltip-visible'), 550);
+    }, { passive: true });
+    container.addEventListener('touchend', hide, { passive: true });
+    container.addEventListener('touchcancel', hide, { passive: true });
+    container.addEventListener('mouseleave', () => container.classList.remove('tooltip-visible'));
+  });
+}
+
+const PANEL_SHADE_GROUPS = {
+  light: new Set(['H006-H','H003-H','H072-YP','H127-PP2','H149-PP1','H198-Y','H205-YP','H234-YP','H236-YP','H241-YP','K01-17N','K01-18N','K01-38M','K01-53N','K01-54H','K01-62H','K01-63H','K01-110X','K01-120X','K01-124X','K01-127X','K01-133X','K01-135X','K01-136X','K01-140X','K01-171X','K01-187N','K01-194N','K01-203N','K01-204N','K01-206N','K01-212H','K01-247N','K01-277A']),
+  dark: new Set(['H093-F','H098-F','M/H-270Y','M/H-271Y','M/H-215Y','M/K01-HM005R','M/P-028K','M/P-065C','M/P-089R','M/P-092R','M/P-093R','M/P-100Q','M/Q-95V','M/Q-96V','M/Q-105A','254M','QK098X','QK099X'])
+};
+function materialFor(article) {
+  if (/^M\/P|^M\/Q/.test(article)) return 'Мозаика';
+  if (/^M\/H/.test(article)) return 'Ткань';
+  if (/^M\/K/.test(article)) return 'Камень';
+  if (/^H/.test(article)) return 'Дерево';
+  if (/^K01|^QK/.test(article)) return 'Однотонная ткань';
+  return 'Бамбук';
+}
+function shadeFor(article) {
+  if (PANEL_SHADE_GROUPS.light.has(article)) return 'Светлый';
+  if (PANEL_SHADE_GROUPS.dark.has(article)) return 'Тёмный';
+  return 'Нейтральный';
+}
+
+const PANEL_ROWS = [
+ ['H006-H',50000,35000],['H198-Y',55000,38500],['H003-H',50000,35000],['K01-194N',50000,35000],['K01-204N',50000,35000],['K01-203N',50000,35000],['K01-174X',50000,35000],['K01-176X',50000,35000],['M/P-089R',65000,45500],['H127-PP2',65000,45500],['H234-YP',55000,38500],['H072-YP',55000,38500],['H205-YP',55000,38500],['K01-187N',50000,35000],['K01-17N',50000,35000],['K01-135X',50000,35000],['K01-136X',50000,35000],['H098-F',55000,38500],['H093-F',55000,38500],['K01-38M',55000,38500],['K01-53N',50000,35000],['H149-PP1',55000,38500],['K01-03-22X',50000,35000],['H241-YP',55000,38500],['K01-54H',50000,35000],['M/P-001U',55000,38500],['K01-18N',50000,35000],['M/P-065C',65000,45500],['M/P-093R',65000,45500],['M/P-092R',65000,45500],['254M',55000,38500],['M/Q-96V',65000,45500],['M/Q-95V',65000,45500],['M/P-100Q',55000,38500],['M/H-271Y',55000,38500],['M/H-270Y',55000,38500],['K01-110X',50000,35000],['K01-171X',50000,35000],['H236-YP',55000,38500],['M/H-215Y',55000,38500],['M/K01-HM005R',65000,45500],['K01-62H',50000,35000],['K01-63H',50000,35000],['K01-120X',50000,35000],['K01-127X',50000,35000],['K01-124X',50000,35000],['K01-133X',50000,35000],['QK098X',50000,35000],['QK099X',55000,38500],['K01-277A',55000,38500],['K01-140X',50000,35000],['K01-206N',50000,35000],['K01-212H',50000,35000],['K01-247N',55000,38500],['M/K02-043T',55000,38500],['M/P-028K',65000,45500],['M/Q-105A',65000,45500]
+ ];let PANELS = PANEL_ROWS.map(([article, retail, partner]) => { const материал = materialFor(article); return { артикул: article, название: article === 'H006-H' ? 'БП Серам Дерево' : `БП ${материал}`, материал, оттенок: shadeFor(article), розница: retail, партнер: partner }; });
+let CUSTOM_PANELS=[]; try{CUSTOM_PANELS=JSON.parse(localStorage.getItem('customBambooPanels')||'[]')||[];}catch(e){CUSTOM_PANELS=[];} PANELS=[...PANELS,...CUSTOM_PANELS];
+
+const LOUVERS = [
+ ['140BLB K01-17N',9000,6300],['160GS K01-17N',10000,7000],['150XCC K01-38M',10000,7000],['160GS H006-H',10000,7000],['150XCC H198-Y',10000,7000],['150XCC K01-204N',8000,5600],['90WYCC K01-53N',8000,5600],['150XCC K01-03-22X',10000,7000],['150SXWGS H003-H',10000,7000],['150SXWGS K01-203N',10000,7000],['139XGS K01-194N',10000,7000],['150XCC K01-194N',10000,7000],['139XGS K01-110X',9000,6300],['139XGS K01-171X',9000,6300],['206SXB H093-F',13000,9100],['206SXB H098-F',13000,9100],['226YHB H205-YP',15000,10500],['226YHB H234-YP',15000,10500],['140BLB K01-187N',10000,7000],['140BLB K01-18N',10000,7000],['140BLB K01-54H',8000,5600],['90WYCC H241-YP',10000,7000],['206SXB 254M',15000,10500],['140BLB K01-136X',9000,6300],['128CHBSIZE K01-135X',8000,5600],['160GS H003-H',10000,7000],['160SXZHGS M/H-271Y',12000,8400],['139XGS M/H-270Y',12000,8400],['128CHB H236-YP',15000,10500],['180ZSB K01-62H',12000,8400],['196ZHCCB K01-63H',12000,8400],['150XCC K01-206N',10000,7000],['150XCC K01-127X',10000,7000],['150XCC K01-124X',10000,7000],['150XCC K01-133X',10000,7000],['150SXWGS H006-H',10000,7000],['90WYCC K01-212H',10000,7000],['90WYCC K01-120X',10000,7000],['120BYB K01-247N',13000,9100]
+];
+const PRICES = { joining:[3500,2450], finishing:[3000,2100], innerCorner:[5000,3500], outerCorner:[5000,3500], lProfile:[5000,3500], glue:[1500,1300], radial:[30000,30000], liftBase:[16000,16000], liftHour:[8000,8000] };
+const SERVICES = [
+ ['wall3m','Монтаж на стену цельными 3м','м²',6000],['split','Монтаж с разбивкой (верт/горизонт)','м²',7000],['customSplit','Монтаж с произвольной разбивкой','м²',8000],['noProfiles','Монтаж без профилей (фреза)','м²',8000],['panel8','Монтаж панелей 8мм','м²',10000],['ceiling','Монтаж на потолок','м²',10000],['doorSlope','Дверные откосы без фрезы','м²',5000],['doorSlopeMill','Дверные откосы с фрезой','м²',6000],['windowSlope','Оконные откосы без фрезы','п.м',5000],['windowSlopeMill','Оконные откосы с фрезой','п.м',6000],['primer','Грунтовка стен','м²',6000],['tvBox','Монтаж ГКЛ-короба под ТВ','м²',6000],['hiddenDoor','Обшивка двери скрытого монтажа панелями','дверь',25000]
+];
+const $ = id => document.getElementById(id); const money = n => `${Math.round(Number(n)||0).toLocaleString('ru-RU')} тг`; const num = id => Math.max(0,Number($(id).value)||0);
+let PRICE_OVERRIDES={}; try{PRICE_OVERRIDES=JSON.parse(localStorage.getItem('bambooPriceOverrides')||'{}')||{};}catch(e){PRICE_OVERRIDES={};}
+function overrideValue(key,base,partner){const x=PRICE_OVERRIDES[key]; if(!x)return base; const value=partner?x.partner:x.retail; return Number.isFinite(Number(value))?Number(value):base;}
+const price = (item) => { const partner = $('partnerMode').checked; if(Array.isArray(item)){const key=LOUVERS.includes(item)?`louver:${LOUVERS.indexOf(item)}`:`profile:${Object.entries(PRICES).find(([,v])=>v===item)?.[0]||''}`; return overrideValue(key,item[partner?1:0],partner); } const key=`panel:${PANELS.indexOf(item)}`; return overrideValue(key,item[partner?'партнер':'розница'],partner); };
+ function fillSelects(){ $('panelSelect').innerHTML=PANELS.map((x,i)=>`<option value="${i}">${x.артикул} | ${x.материал} | ${x.оттенок}</option>`).join(''); $('louverSelect').innerHTML='<option value="">Не добавлять</option>'+LOUVERS.map((x,i)=>`<option value="${i}">${x[0]}</option>`).join(''); updatePriceLabels(); }
+ function updatePriceLabels(){ const map={innerCorner:'innerCorner',outerCorner:'outerCorner',lProfile:'lProfile'}; Object.entries(map).forEach(([id,key])=>document.querySelector(`[data-price="${id}"]`).textContent=money(price(PRICES[key]))); const panel=PANELS[Number($('panelSelect').value)]||PANELS[0]; $('panelPrice').textContent=`Цена панели: ${$('partnerMode').checked?'Партнерская':'Розничная'} — ${money(price(panel))}`; const louverIndex=$('louverSelect').value; $('louverPrice').textContent=louverIndex===''?'':`Цена лувера: ${$('partnerMode').checked?'Партнерская':'Розничная'} — ${money(price(LOUVERS[Number(louverIndex)]))}`; }
+ function renderServices(){ $('services').innerHTML=SERVICES.map(([id,name,unit,p])=>`<label class="checkline"><input type="checkbox" data-service="${id}" ${id==='wall3m'?'checked':''}><span>${name}<small class="subtle"> (${unit})</small></span><b class="price">${money(p)} / ${unit}</b></label>`).join(''); }
+function parseText(){
+  let t=$('description').value.toLowerCase().replace(/,/g,'.');
+  const fractions={'два с половиной':'2.5','три с половиной':'3.5','полтора':'1.5','полторы':'1.5'};
+  Object.entries(fractions).forEach(([word,value])=>{t=t.replaceAll(word,value);});
+  const words={'ноль':'0','один':'1','одна':'1','два':'2','две':'2','три':'3','четыре':'4','пять':'5','шесть':'6','семь':'7','восемь':'8','девять':'9','десять':'10'};
+  Object.entries(words).forEach(([word,value])=>{t=t.replace(new RegExp('(^|[^а-яё])'+word+'(?=$|[^а-яё])','gi'),'$1'+value);});
+  const size=/([0-9]+(?:\.[0-9]+)?)\s*(?:на|x|х|×)\s*([0-9]+(?:\.[0-9]+)?)/;
+  const wallMatch=t.match(new RegExp('стен[^0-9]{0,24}'+size.source));
+  const anySize=t.match(size);
+  const wall=wallMatch||anySize;
+  if(wall){ document.querySelector('input[value="wall"]').checked=true; toggleMode(); const length=wall[1]||wall[2], height=wall[2]||wall[3]; if(length && height){$('wallLength').value=length; $('wallHeight').value=height;} }
+  const area=t.match(/([0-9]+(?:\.[0-9]+)?)\s*(?:кв\.?\s*м(?:етр(?:а|ов|ы)?)?|м2|м²|квадрат(?:а|ов)?|квадратн(?:ый|ых|ые)?\s*метр(?:а|ов|ы)?|метр(?:а|ов|ы)?\s*квадратн(?:ый|ых|ые)?)/); if(area && !wall){document.querySelector('input[value="floor"]').checked=true;toggleMode();$('floorArea').value=area[1];}
+  const w=t.match(/([0-9]+)\s*(?:окн|окон)/); const d=t.match(/([0-9]+)\s*(?:двер|дверей)/); if(w)$('windows').value=w[1]; if(d)$('doors').value=d[1];
+  if(/окн/.test(t)&&!w)$('windows').value=1; if(/двер/.test(t)&&!d)$('doors').value=1;
+  const windowSize=t.match(/окн[^0-9]{0,12}([0-9.]+)\s*(?:на|x|х|×)\s*([0-9.]+)/); const doorSize=t.match(/двер[^0-9]{0,12}([0-9.]+)\s*(?:на|x|х|×)\s*([0-9.]+)/);
+  if(windowSize){$('windowPerimeter').value=(2*(Number(windowSize[1])+Number(windowSize[2]))).toFixed(2);}
+  if(doorSize){$('doorPerimeter').value=(2*(Number(doorSize[1])+Number(doorSize[2]))).toFixed(2);}
+  const mountServiceIds=['split','customSplit','noProfiles','panel8','ceiling'];
+  const setService=id=>{const checkbox=document.querySelector(`[data-service="${id}"]`); if(checkbox)checkbox.checked=true;};
+  const setMountService=id=>{const wall3m=document.querySelector('[data-service="wall3m"]'); if(wall3m)wall3m.checked=false; mountServiceIds.filter(other=>other!==id).forEach(other=>{const checkbox=document.querySelector(`[data-service="${other}"]`); if(checkbox)checkbox.checked=false;}); setService(id);};
+  if(/произвольн/.test(t)) setMountService('customSplit'); else if(/разбивк/.test(t)) setMountService('split');
+  if(/фрез/.test(t)) setMountService('noProfiles');
+  if(/потол/.test(t)) setMountService('ceiling');
+  if(/8\s*мм|8мм/.test(t)) setMountService('panel8');
+  if(/грунтов/.test(t)) setService('primer');
+  const hasWindowSlopes=/оконн[^.!?]{0,24}откос|откос[^.!?]{0,24}оконн/.test(t);
+  const hasDoorSlopes=/дверн[^.!?]{0,24}откос|откос[^.!?]{0,24}дверн/.test(t);
+  if(hasWindowSlopes){setService(/фрез/.test(t)?'windowSlopeMill':'windowSlope');}
+  if(hasDoorSlopes){setService(/фрез/.test(t)?'doorSlopeMill':'doorSlope');}
+  if(/откос/.test(t)&&!hasWindowSlopes&&!hasDoorSlopes){setService('windowSlope');setService('doorSlope');}
+  if(/счет|счёт|оплачу|оплата|предоплат|выстави\s+счет|выстави\s+счёт/.test(t)){invoiceRequested=true; updateInvoiceButton();} if(/клиент\s+думает/.test(t))$('clientStatus').value='Думает'; if(/клиент\s+согласен/.test(t))$('clientStatus').value='Согласен'; const waste=t.match(/запас\s*([0-9]+)\s*%/); const discount=t.match(/скидк[^0-9]*([0-9]+)\s*%/); if(waste){$('waste').value=Math.min(30,Number(waste[1]));} if(discount){$('discount').value=Math.min(100,Number(discount[1]));}
+  updateRangeLabels(); calculate();
+}
+function toggleMode(){ const wall=document.querySelector('input[name="calcMode"]:checked').value==='wall'; $('wallFields').classList.toggle('hidden',!wall); $('floorField').classList.toggle('hidden',wall); }
+ function serviceTotal(area, windows, doors){ let total=0; const windowPerimeter=num('windowPerimeter'); const doorPerimeter=num('doorPerimeter'); document.querySelectorAll('[data-service]:checked').forEach(el=>{ const item=SERVICES.find(x=>x[0]===el.dataset.service); if(!item)return; let qty=area; if(item[0].includes('Slope')) qty=item[0].includes('window')?windows*windowPerimeter:doors*doorPerimeter; if(item[0]==='hiddenDoor') qty=doors; let unit=overrideValue(`service:${item[0]}`,item[3],$('partnerMode').checked); if(item[0]==='windowSlope' && windows>=4)unit=4000; if(item[0]==='windowSlopeMill' && windows>=4)unit=5000; if(item[0]==='hiddenDoor' && doors>=4)unit=20000; total+=Number(qty||0)*Number(unit||0); }); const hours=num('liftHours'); if(hours && !$('hasLift')?.checked) total+=price(PRICES.liftBase)+Math.max(0,hours-2)*price(PRICES.liftHour); total+=num('radialAngles')*price(PRICES.radial); return Number(total)||0; }
+ function updatePrepNotes(){ const notes=[]; if($('prepElectrician')?.checked)notes.push('Электрик вызван'); if($('prepPlumber')?.checked)notes.push('Сантехник вызван'); if($('prepWalls')?.checked)notes.push('Стены очищены и прогрунтованы'); $('prepNotes').innerHTML=notes.length?`<b>Примечания:</b> ${notes.join(' · ')}`:''; }
+function calculate(){
+  const wall=document.querySelector('input[name="calcMode"]:checked').value==='wall';
+  const walls=wall?getWalls():[];
+  const area=wall?walls.reduce((sum,item)=>sum+item.length*item.height,0):num('floorArea');
+  const openingPerimeter=num('windows')*num('windowPerimeter')+num('doors')*num('doorPerimeter');
+  const basePanels=area>0?Math.ceil(area/(3*1.22)):0; const panels=Math.ceil(basePanels*(1+num('waste')/100));
+  const joining=wall?walls.reduce((sum,item)=>sum+Math.max(0,Math.ceil(item.length/1.22)-1)*Math.ceil(item.height/2.99),0):0;
+  const wallFinishing=wall?walls.reduce((sum,item)=>sum+Math.ceil((2*item.length+2*item.height)/2.99),0):0;
+  const finishing=wall?wallFinishing+(openingPerimeter>0?Math.ceil(openingPerimeter/2.99):0):0;
+  const autoMaterials=$('autoMaterials')?.checked; const estimatedWidth=wall?walls.reduce((sum,item)=>sum+item.length,0):Math.sqrt(area||0); const autoLouvers=autoMaterials&&estimatedWidth>0?Math.ceil(estimatedWidth/0.15):0; const autoJoin=autoMaterials&&area>0?(wall?joining:Math.ceil((4*Math.sqrt(area))/1.22)):joining; const autoFinish=autoMaterials&&area>0?(wall?finishing:Math.ceil((4*Math.sqrt(area))/2.99)):finishing;
+  const glue=Math.ceil(panels*1.5); const selectedPanel=PANELS[Number($('panelSelect').value)]||PANELS[0]; const panelPrice=price(selectedPanel);
+  let materials=panels*panelPrice+autoJoin*price(PRICES.joining)+autoFinish*price(PRICES.finishing)+glue*price(PRICES.glue);
+  if($('innerCorner').checked)materials+=price(PRICES.innerCorner); if($('outerCorner').checked)materials+=price(PRICES.outerCorner); if($('lProfile').checked)materials+=price(PRICES.lProfile); const selectedLouverIndex=$('louverSelect').value; if(selectedLouverIndex!=='' && LOUVERS[Number(selectedLouverIndex)])materials+=(autoMaterials?autoLouvers:panels)*price(LOUVERS[Number(selectedLouverIndex)]);
+  const services=serviceTotal(area,num('windows'),num('doors')); const subtotal=materials+services; const discount=subtotal*num('discount')/100; const vat=(subtotal-discount)*num('vat')/100; const delivery=num('delivery'); const total=subtotal-discount+vat+delivery;
+  $('outArea').textContent=area.toFixed(2)+' м²'; $('discountWarning').classList.toggle('visible',num('discount')>15); $('outPanels').textContent=panels+' шт.'; $('outJoin').textContent=autoJoin+' шт.'; $('outEnd').textContent=autoFinish+' шт.'; $('outGlue').textContent=glue+' шт.'; $('outOpenings').textContent=`${num('windows')} / ${num('doors')}`; $('total').textContent=money(total); $('stickyTotal').textContent=money(total); updatePrepNotes(); $('breakdown').innerHTML=`Материалы: <b>${money(materials)}</b> · Монтаж: <b>${money(services)}</b><br>${autoMaterials?`Авто-луверы: <b>${autoLouvers} шт.</b> · Авто-профили: <b>${autoJoin+autoFinish} шт.</b><br>`:''}Скидка: <b>−${money(discount)}</b> · НДС: <b>${money(vat)}</b> · Доставка: <b>${money(delivery)}</b>`; $('minWarning').innerHTML=total<50000?'<div class="warning">Итог ниже минимальной суммы заказа — 50 000 тг.</div>':'<div class="ok" style="margin-top:12px">Минимальная сумма заказа соблюдена.</div>'; $('resultStatus').textContent='расчет обновлен'; $('pdfContext').innerHTML=`<b>Дата:</b> ${new Date().toLocaleDateString('ru-RU')} · <b>Менеджер:</b> ${$('managerSelect').value}<br><b>Клиент:</b> ${$('clientName').value||'Не указан'} · <b>Статус:</b> ${$('clientStatus').value}`; const panelUnit=panelPrice; $('pdfDetails').innerHTML=`<b>Детализация:</b><br>Панель ${selectedPanel.артикул}: ${panels} x ${money(panelUnit)} = ${money(panels*panelUnit)}<br>Соединительный профиль: ${autoJoin} x ${money(price(PRICES.joining))} = ${money(autoJoin*price(PRICES.joining))}<br>Завершающий профиль: ${autoFinish} x ${money(price(PRICES.finishing))} = ${money(autoFinish*price(PRICES.finishing))}<br>Клей: ${glue} x ${money(price(PRICES.glue))} = ${money(glue*price(PRICES.glue))}`; $('panelPrintPreview').style.background=selectedPanel.фото?`url(${selectedPanel.фото}) center/cover no-repeat`:'linear-gradient(110deg,#b87d54,#e1b581 42%,#6e4437 75%,#d09b6c)'; save(); return {area,panels,joining:autoJoin,finishing:autoFinish,glue,autoLouvers,materials,services,discount,vat,delivery,total};
+}
+function save(){ try{ const data={}; document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id)data[el.id]=el.type==='checkbox'?el.checked:el.value;}); localStorage.setItem('bambooCalculator',JSON.stringify(data)); }catch(e){} }
+ function restore(){ let d={}; try{d=JSON.parse(localStorage.getItem('bambooCalculator')||'{}')||{};}catch(e){d={};} if(String(d.floorArea)==='20')d.floorArea=''; if(String(d.windowPerimeter)==='4.8')d.windowPerimeter=''; if(String(d.doorPerimeter)==='5.4')d.doorPerimeter=''; Object.entries(d).forEach(([id,v])=>{const el=$(id);if(!el)return; if(el.type==='checkbox')el.checked=v; else el.value=v;}); toggleMode(); updatePriceLabels(); updateRangeLabels(); }
+function updateRangeLabels(){ [['discount','%'],['waste','%'],['vat','%'],['delivery',' тг']].forEach(([id,s])=>$(id+'Out').textContent=(id==='delivery'?money(num(id)):num(id)+s)); }
+function openModal(title,text,buttons=[['Закрыть','close']]){ $('modalRoot').className='modal-backdrop'; $('modalRoot').innerHTML=`<div class="modal"><h2>${title}</h2><p>${text}</p><div class="actions">${buttons.map(([t,a])=>`<button class="btn ${a==='close'?'secondary':''}" data-modal="${a}">${t}</button>`).join('')}</div></div>`; $('modalRoot').querySelectorAll('[data-modal]').forEach(b=>b.onclick=()=>{if(b.dataset.modal==='close'){$('modalRoot').className='hidden';}else assistantStep(b.dataset.modal);}); }
+function assistantForm(title,prompt,fields,nextLabel,nextAction){ $('modalRoot').className='modal-backdrop'; $('modalRoot').innerHTML=`<div class="modal"><h2>${title}</h2><p>${prompt}</p><div class="modal-fields">${fields}</div><div class="actions"><button class="btn primary" id="assistantNextBtn">${nextLabel}</button><button class="btn secondary" id="assistantCloseBtn">Закрыть</button></div></div>`; $('assistantCloseBtn').onclick=()=>$('modalRoot').className='hidden'; $('assistantNextBtn').onclick=nextAction; }
+function assistantStep(step){ if(step==='start')openModal('Интерактивный помощник','Пройдем расчет короткими шагами.',[['По площади пола','floor'],['По размерам стены','wall'],['Закрыть','close']]); else if(step==='floor'){document.querySelector('input[value="floor"]').checked=true;toggleMode();assistantForm('Шаг 2 из 4','Введите площадь пола в квадратных метрах:','<input id="modalFloorArea" type="number" min="0" step="0.01" placeholder="Например: 15.5">','Далее',()=>{$('floorArea').value=$('modalFloorArea').value;assistantStep('openings');});} else if(step==='wall'){document.querySelector('input[value="wall"]').checked=true;toggleMode();assistantForm('Шаг 2 из 4','Введите размеры стены:','<input id="modalWallLength" type="number" min="0" step="0.01" placeholder="Длина (м)"><input id="modalWallHeight" type="number" min="0" step="0.01" placeholder="Высота (м)">','Далее',()=>{$('wallLength').value=$('modalWallLength').value;$('wallHeight').value=$('modalWallHeight').value;assistantStep('openings');});} else if(step==='openings'){assistantForm('Шаг 3 из 4','Окна и двери:','<input id="modalWindows" type="number" min="0" step="1" value="0" placeholder="Кол-во окон"><input id="modalDoors" type="number" min="0" step="1" value="0" placeholder="Кол-во дверей">','Рассчитать',()=>{$('windows').value=$('modalWindows').value||0;$('doors').value=$('modalDoors').value||0;$('modalRoot').className='hidden';calculate();});} }
+$('fileBtn').onclick=()=>$('fileInput').click(); $('fileInput').onchange=e=>{const f=e.target.files[0];if(f){const r=new FileReader();r.onload=()=>{$('description').value=r.result;parseText();};r.readAsText(f);}}; $('voiceBtn').onclick=()=>{const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;if(!Speech){openModal('Голосовой ввод','Ваш браузер не поддерживает Web Speech API.');return;} const rec=new Speech();rec.lang='ru-RU';rec.onresult=e=>{$('description').value=e.results[0][0].transcript;parseText();};rec.start();}; $('description').addEventListener('blur',parseText); $('calculateBtn').onclick=calculate; $('assistantBtn').onclick=()=>openModal('Интерактивный помощник','Пройдем расчет короткими шагами.',[['Начать','start'],['Закрыть','close']]); $('aiBtn').onclick=runAIForTypedText; $('partnerMode').onchange=()=>{updatePriceLabels();calculate();}; $('panelSelect').onchange=()=>{updatePriceLabels();calculate();}; $('louverSelect').onchange=()=>{updatePriceLabels();calculate();}; document.querySelectorAll('input[name="calcMode"]').forEach(x=>x.onchange=()=>{toggleMode();calculate();}); document.querySelectorAll('input[type=range]').forEach(x=>x.oninput=()=>{updateRangeLabels();calculate();}); document.querySelectorAll('input,select').forEach(x=>x.addEventListener('change',()=>{if(x.id!=='fileInput')calculate();})); $('services').addEventListener('change',e=>{if(e.target.matches('[data-service=\"wall3m\"]')&&e.target.checked){['split','customSplit','noProfiles','panel8','ceiling'].forEach(id=>{const checkbox=document.querySelector(`[data-service=\"${id}\"]`);if(checkbox)checkbox.checked=false;});}else if(e.target.matches('[data-service]')&&e.target.checked&&['split','customSplit','noProfiles','panel8','ceiling'].includes(e.target.dataset.service)){const wall3m=document.querySelector('[data-service=\"wall3m\"]');if(wall3m)wall3m.checked=false;['split','customSplit','noProfiles','panel8','ceiling'].filter(id=>id!==e.target.dataset.service).forEach(id=>{const checkbox=document.querySelector(`[data-service=\"${id}\"]`);if(checkbox)checkbox.checked=false;});} calculate();}); document.querySelectorAll('input[type="number"]').forEach(x=>x.addEventListener('input',calculate)); $('copyBtn').onclick=()=>{const r=calculate();const selectedPanel=PANELS[Number($('panelSelect').value)]||PANELS[0];const text=`ПРЕДВАРИТЕЛЬНЫЙ РАСЧЕТ\nПанель: ${selectedPanel.артикул} (${selectedPanel.название})\nОттенок / стиль: ${$('shadeSelect').value}\nПлощадь: ${r.area.toFixed(2)} м²\nПанели: ${r.panels} шт.\nСоединительный профиль: ${r.joining} шт.\nЗавершающий профиль: ${r.finishing} шт.\nКлей: ${r.glue} шт.\nМатериалы: ${money(r.materials)}\nМонтаж: ${money(r.services)}\nСкидка: -${money(r.discount)}\nНДС: ${money(r.vat)}\nДоставка: ${money(r.delivery)}\nИТОГО: ${money(r.total)}\n\nПредварительный расчет. Точная стоимость — после замера.`; navigator.clipboard?.writeText(text).then(()=>openModal('Готово','Расчет скопирован. Его можно отправить в WhatsApp.')).catch(()=>openModal('Текст расчета',text));};
+function getWalls(){ return Array.from(document.querySelectorAll('#wallList .wall-row')).map(row=>({length:Math.max(0,Number(row.querySelector('[data-wall-length]').value)||0),height:Math.max(0,Number(row.querySelector('[data-wall-height]').value)||0)})); }
+function addWall(){ const list=$('wallList'); const id=list.children.length+1; const row=document.createElement('div'); row.className='wall-row'; row.dataset.wallId=id; row.innerHTML=`<div class="field"><label>Стена ${id} · длина L, м</label><input data-wall-length id="wallLength${id}" type="number" min="0" step="0.01" placeholder="0"></div><div class="field"><label>Высота H, м</label><input data-wall-height id="wallHeight${id}" type="number" min="0" step="0.01" placeholder="0"></div><div class="wall-actions"><button type="button" class="btn small secondary remove-wall">×</button></div>`; list.appendChild(row); row.querySelector('.remove-wall').onclick=()=>{row.remove(); renumberWalls(); calculate();}; row.querySelectorAll('input').forEach(input=>input.addEventListener('input',calculate)); calculate(); }
+function renumberWalls(){Array.from(document.querySelectorAll('#wallList .wall-row')).forEach((row,index)=>{row.dataset.wallId=index+1; row.querySelector('label').textContent=`Стена ${index+1} · длина L, м`;});}
+function ensureWalls(){ const first=document.querySelector('#wallList .wall-row'); if(first){first.querySelector('#wallLength')?.setAttribute('data-wall-length','true'); first.querySelector('#wallHeight')?.setAttribute('data-wall-height','true');} }
+function speakTotal(result){ if('speechSynthesis' in window){ const utterance=new SpeechSynthesisUtterance(`Итого: ${Math.round(result.total).toLocaleString('ru-RU')} тенге`); utterance.lang='ru-RU'; window.speechSynthesis.cancel(); window.speechSynthesis.speak(utterance); } }
+function snapshot(){ const data={}; document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id)data[el.id]=el.type==='checkbox'?el.checked:el.value;}); data.walls=getWalls(); return data; }
+function applySnapshot(data){ if(!data)return; Object.entries(data).forEach(([id,value])=>{if(id==='walls')return; const el=$(id); if(!el)return; if(el.type==='checkbox')el.checked=value; else el.value=value;}); const walls=data.walls||[]; if(walls.length){$('wallList').innerHTML=''; walls.forEach((wall,index)=>{const id=index+1; const row=document.createElement('div'); row.className='wall-row'; row.dataset.wallId=id; row.innerHTML=`<div class="field"><label>Стена ${id} · длина L, м</label><input data-wall-length id="wallLength${id===1?'':id}" type="number" value="${wall.length||''}" placeholder="0"></div><div class="field"><label>Высота H, м</label><input data-wall-height id="wallHeight${id===1?'':id}" type="number" value="${wall.height||''}" placeholder="0"></div><div class="wall-actions"><button type="button" class="btn small secondary ${id===1?'hidden':''} remove-wall">×</button></div>`; $('wallList').appendChild(row);}); document.querySelectorAll('#wallList .remove-wall').forEach(btn=>btn.onclick=()=>{btn.closest('.wall-row').remove();renumberWalls();calculate();}); document.querySelectorAll('#wallList input').forEach(input=>input.addEventListener('input',calculate));} toggleMode(); updatePriceLabels(); updateRangeLabels(); calculate(); }
+function historyItems(){try{return JSON.parse(localStorage.getItem('bambooHistory')||'[]')||[];}catch(e){return[];}}
+function saveHistory(result){const list=historyItems(); list.unshift({date:new Date().toLocaleString('ru-RU'),name:$('clientName').value||'Без имени',status:$('clientStatus').value,manager:$('managerSelect').value,total:result.total,state:snapshot()}); try{localStorage.setItem('bambooHistory',JSON.stringify(list.slice(0,20)));}catch(e){}}
+function downloadHistory(){const blob=new Blob([JSON.stringify(historyItems(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='История_расчетов.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);}
+function importHistory(file){const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);if(!Array.isArray(data))throw Error('bad');localStorage.setItem('bambooHistory',JSON.stringify(data.slice(0,20)));showHistory();}catch(e){openModal('Ошибка','Не удалось загрузить JSON-базу.');}};r.readAsText(file);}
+function clearHistory(){if(confirm('Очистить всю историю расчетов?')){localStorage.removeItem('bambooHistory');showHistory();}}
+function showHistory(){const list=historyItems(); const text=list.length?list.map((item,index)=>`<div class="history-item" data-history="${index}"><b>${item.name}</b> · ${item.status||'Новый'}<br><span class="hint">${item.date} · ${item.manager||''} · ${money(item.total)}</span></div>`).join(''):'<p class="subtle">История пока пуста.</p>'; $('modalRoot').className='modal-backdrop'; $('modalRoot').innerHTML=`<div class="modal"><h2>История расчетов</h2><p>Последние 20 сохраненных расчетов</p><div class="history-tools"><button class="btn secondary" id="downloadHistoryBtn">Скачать базу</button><button class="btn secondary" id="importHistoryBtn">Загрузить базу</button><input id="historyFileInput" type="file" accept=".json,application/json" class="hidden"><button class="btn danger" id="clearHistoryBtn">Очистить историю</button></div>${text}<div class="actions"><button class="btn secondary" data-modal-close>Закрыть</button></div></div>`; $('modalRoot').querySelector('[data-modal-close]').onclick=()=> $('modalRoot').className='hidden';$('downloadHistoryBtn').onclick=downloadHistory;$('importHistoryBtn').onclick=()=>$('historyFileInput').click();$('historyFileInput').onchange=e=>{if(e.target.files[0])importHistory(e.target.files[0]);};$('clearHistoryBtn').onclick=clearHistory;$('modalRoot').querySelectorAll('[data-history]').forEach(el=>el.onclick=()=>{applySnapshot(list[Number(el.dataset.history)].state);$('modalRoot').className='hidden';});}
+
+function calculateAndSpeak(){if(navigator.vibrate)navigator.vibrate(50); parseText(); const result=calculate(); saveHistory(result); speakTotal(result);}
+function resetData(){
+  if(!confirm('Вы уверены, что хотите очистить все данные?'))return; invoiceRequested=false; updateInvoiceButton();
+  document.querySelectorAll('input,textarea').forEach(el=>{if(el.type==='checkbox')el.checked=false;else if(el.type!=='radio'&&el.type!=='range')el.value='';});
+  document.querySelector('input[value="floor"]').checked=true; $('partnerMode').checked=false; $('discount').value=0; $('waste').value=0; $('vat').value=16; $('delivery').value=15000; $('shadeSelect').value='Светлый'; $('panelSelect').selectedIndex=0; $('louverSelect').value='';
+  $('wallList').innerHTML='<div class="wall-row" data-wall-id="1"><div class="field"><label for="wallLength">Стена 1 · длина L, м</label><input id="wallLength" data-wall-length type="number" min="0" step="0.01" placeholder="0"></div><div class="field"><label for="wallHeight">Высота H, м</label><input id="wallHeight" data-wall-height type="number" min="0" step="0.01" placeholder="0"></div><div class="wall-actions"><button type="button" class="btn small secondary remove-wall hidden">×</button></div></div>';
+  const defaultMount=$('services').querySelector('[data-service="wall3m"]'); if(defaultMount)defaultMount.checked=true; $('wallList').querySelectorAll('input').forEach(input=>input.addEventListener('input',calculate)); toggleMode(); ensureWalls(); updatePriceLabels(); updateRangeLabels(); calculate();
+}
+function buildClientText(r){ const panel=PANELS[Number($('panelSelect').value)]||PANELS[0]; const date=new Date().toLocaleDateString('ru-RU'); const prep=$('prepNotes').textContent; return `Здравствуйте, ${$('clientName').value||'коллеги'}!\n\n📅 Дата: ${date}\n👤 Менеджер: ${$('managerSelect').value}\nСтатус: ${$('clientStatus').value}\nТелефон: ${$('clientPhone').value||'—'}${$('clientPhone2').value?`\nТелефон 2: ${$('clientPhone2').value}`:''}\n\n📏 Расчет бамбуковых панелей\nПанель: ${panel.артикул} (${panel.название})\nОттенок: ${$('shadeSelect').value}\nПлощадь: ${r.area.toFixed(2)} м²\n\nМатериалы: ${money(r.materials)}\nМонтаж: ${money(r.services)}\nСкидка: ${money(r.discount)}\nНДС: ${money(r.vat)}\n\n💰 Итого: ${money(r.total)}\n✅ Предварительный расчет. Точная стоимость — после замера.\nСрок действия предложения: 3 дня\n\nКонтакты: forone.kz · forone.kz@yandex.kz\nАлматы +7 708 911 4298 · Астана +7 701 006 5468${prep?`\n\n${prep}`:''}`; }
+
+function normalizePhone(value){ let raw=String(value||'').trim(); if(!raw)return ''; let digits=raw.replace(/\D/g,''); if(digits.startsWith('8')&&digits.length>=11)digits='7'+digits.slice(1); return digits; }
+
+function sendWhatsApp(){ const phone=normalizePhone($('clientPhone').value); if(!phone){openModal('Телефон','Введите телефон');return;} const text=buildClientText(calculate()); const encoded=encodeURIComponent(text); const url=`https://wa.me/${phone}?text=${encoded}`; window.open(url,'_blank','noopener,noreferrer'); }
+function updateInvoiceButton(){const button=$('invoiceBtn');if(button)button.style.display=invoiceRequested?'inline-flex':'none';}
+function showInvoice(){const r=calculate();const now=new Date();const number=now.toLocaleDateString('ru-RU').replace(/\./g,'')+'-'+String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');const client=$('clientName').value||'Не указан';const phone=$('clientPhone').value||'Не указан';$('modalRoot').className='modal-backdrop';$('modalRoot').innerHTML=`<div class="modal"><h2>СЧЕТ НА ОПЛАТУ №${number}</h2><div class="subtle">Дата: ${now.toLocaleDateString('ru-RU')}<br>Плательщик: ${client}<br>Телефон: ${phone}</div><hr><p><b>Поставщик:</b> ТОО «Forone»<br><b>БИН:</b> 000000000000 (заглушка)</p><p><b>Назначение платежа:</b> Бамбуковые панели и монтаж</p><p><b>Итого к оплате:</b> <span style="font-size:24px;color:var(--accent)">${money(r.total)}</span></p><div class="pdf-contact"><b>Реквизиты:</b><br>Сайт: forone.kz<br>Email: forone.kz@yandex.kz<br>Алматы: +7 708 911 4298<br>Астана: +7 701 006 5468<br>IBAN: KZ00 0000 0000 0000 0000<br>Банк: Kaspi Bank, БИК: CASPKZKA</div><div class="actions"><button class="btn primary" id="printInvoiceBtn">Печать / PDF</button><button class="btn secondary" id="closeInvoiceBtn">Закрыть</button></div></div>`;$('closeInvoiceBtn').onclick=()=>$('modalRoot').className='hidden';$('printInvoiceBtn').onclick=()=>window.print();}
+function priceRows(){const rows=[]; PANELS.forEach((x,i)=>rows.push({type:'panel',key:`panel:${i}`,label:`${x.артикул} | ${x.материал}`,retail:priceForRow(x,'retail'),partner:priceForRow(x,'partner')})); LOUVERS.forEach((x,i)=>rows.push({type:'louver',key:`louver:${i}`,label:x[0],retail:priceForRow(x,'retail'),partner:priceForRow(x,'partner')})); SERVICES.forEach(x=>rows.push({type:'service',key:`service:${x[0]}`,label:x[1],retail:priceForRow(x,'retail'),partner:priceForRow(x,'partner')})); Object.entries(PRICES).forEach(([k,v])=>rows.push({type:'profile',key:`profile:${k}`,label:`Профиль: ${k}`,retail:priceForRow(v,'retail'),partner:priceForRow(v,'partner')})); return rows;}
+function priceForRow(item,side){let base,key;if(Array.isArray(item)&&SERVICES.includes(item)){base=item[3];key=`service:${item[0]}`;}else if(Array.isArray(item)){base=item[side==='partner'?1:0];key=LOUVERS.includes(item)?`louver:${LOUVERS.indexOf(item)}`:`profile:${Object.entries(PRICES).find(([,v])=>v===item)?.[0]||''}`;}else{base=item[side==='partner'?'партнер':'розница'];key=`panel:${PANELS.indexOf(item)}`;} const override=PRICE_OVERRIDES[key]?.[side]; return Number(side==='retail'&&Number(override)===0?base:(override??base))||0;}
+function savePriceOverrides(){try{localStorage.setItem('bambooPriceOverrides',JSON.stringify(PRICE_OVERRIDES));}catch(e){}}
+function csvEscape(v){return `"${String(v??'').replaceAll('"','""')}"`;}
+function exportPrices(){const csv='Тип,Ключ,Название,Розница,Партнерская\n'+priceRows().map(r=>[r.type,r.key,r.label,r.retail,r.partner].map(csvEscape).join(',')).join('\n'); const blob=new Blob(['\\ufeff'+csv],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Прайс_бамбуковые_панели.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);}
+function importPrices(file){const reader=new FileReader();reader.onload=()=>{const lines=String(reader.result).replace(/^\ufeff/,'').split(/\r?\n/).filter(Boolean).slice(1); lines.forEach(line=>{const cols=[];let cur='',quoted=false;for(const ch of line){if(ch==='"')quoted=!quoted;else if(ch===','&&!quoted){cols.push(cur);cur='';}else cur+=ch;}cols.push(cur);if(cols.length>=5){const key=cols[1].replaceAll('""','"').replace(/^"|"$/g,'');PRICE_OVERRIDES[key]={retail:Number(cols[3].replaceAll('"',''))||0,partner:Number(cols[4].replaceAll('"',''))||0};}});savePriceOverrides();updatePriceLabels();calculate();openModal('Прайс обновлен','Цены из CSV сохранены в этом браузере.');};reader.readAsText(file,'utf-8');}
+function showPriceSettings(){const rows=priceRows();$('modalRoot').className='modal-backdrop';$('modalRoot').innerHTML=`<div class="modal"><h2>Управление ценами</h2><p>Изменения сохраняются локально в этом браузере.</p><div class="price-form"><b class="full">Добавить свою панель</b><input id="customArticle" placeholder="Артикул"><select id="customMaterialType"><option>Дерево</option><option>Ткань</option><option>Мрамор</option><option>Камень</option><option>Кожа</option><option>Однотонная</option><option>Мозаика</option><option value="custom">Свой материал</option></select><input id="customMaterial" placeholder="Название / Материал"><input id="customRetail" type="number" placeholder="Розница"><input id="customPartner" type="number" placeholder="Партнерская"><input id="customPhotoInput" type="file" accept="image/*"><img id="customPhotoPreview" class="custom-panel-preview hidden" alt="Превью своей панели"><button class="btn primary full" id="addCustomPanelBtn">Добавить панель</button></div><div class="actions"><button class="btn secondary" id="exportPriceBtn">Скачать прайс</button><button class="btn secondary" id="importPriceBtn">Загрузить прайс</button><input id="priceCsvInput" type="file" accept=".csv,text/csv" class="hidden"></div><div class="price-table-wrap"><table class="price-table"><thead><tr><th>Позиция</th><th>Розница</th><th>Партнер</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${r.label}<input type="hidden" data-price-key="${r.key}"></td><td><input type="number" data-price-retail="${r.key}" value="${r.retail}"></td><td><input type="number" data-price-partner="${r.key}" value="${r.partner}"></td></tr>`).join('')}</tbody></table></div><div class="actions"><button class="btn primary" id="savePricesBtn">Сохранить изменения</button><button class="btn secondary" id="closePricesBtn">Закрыть</button></div></div>`;let customPhotoData='';$('customPhotoInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,300/img.width),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);customPhotoData=canvas.toDataURL('image/jpeg',.78);$('customPhotoPreview').src=customPhotoData;$('customPhotoPreview').classList.remove('hidden');};img.src=r.result;};r.readAsDataURL(f);};$('addCustomPanelBtn').onclick=()=>{const article=$('customArticle').value.trim(),materialInput=$('customMaterial').value.trim(),materialType=$('customMaterialType').value,material=materialType==='custom'?materialInput:materialType;if(!article||!material){openModal('Проверка','Укажите артикул и материал панели.');return;}const panel={артикул:article,название:material,материал:material,оттенок:'Нейтральный',розница:Number($('customRetail').value)||0,партнер:Number($('customPartner').value)||0,фото:customPhotoData};CUSTOM_PANELS.push(panel);PANELS.push(panel);localStorage.setItem('customBambooPanels',JSON.stringify(CUSTOM_PANELS));fillSelects();$('panelSelect').value=String(PANELS.length-1);updatePriceLabels();calculate();$('modalRoot').className='hidden';};$('exportPriceBtn').onclick=exportPrices;$('importPriceBtn').onclick=()=>$('priceCsvInput').click();$('priceCsvInput').onchange=e=>{if(e.target.files[0])importPrices(e.target.files[0]);};$('closePricesBtn').onclick=()=>$('modalRoot').className='hidden';$('savePricesBtn').onclick=()=>{document.querySelectorAll('[data-price-retail]').forEach(el=>{const key=el.dataset.priceRetail;PRICE_OVERRIDES[key]={retail:Number(el.value)||0,partner:Number(document.querySelector(`[data-price-partner="${key}"]`).value)||0};});savePriceOverrides();updatePriceLabels();calculate();$('modalRoot').className='hidden';openModal('Готово','Изменения цен сохранены.');};}
+let photoData='';
+function handlePhoto(file){if(!file)return; const done=data=>{photoData=data;$('photoPreview').src=data;$('photoPreview').classList.add('visible');$('pdfPhotoImage').src=data;$('pdfPhotoSection').classList.remove('hidden');$('photoPdfTitle').classList.remove('hidden');$('photoStatus').textContent=`Фото добавлено (${Math.round(file.size/1024)} КБ). При печати PDF оно попадет в раздел «Фото объекта».`;}; if(file.size<=4*1024*1024){const r=new FileReader();r.onload=()=>done(r.result);r.readAsDataURL(file);return;} const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,800/img.width),canvas=document.createElement('canvas');canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);done(canvas.toDataURL('image/jpeg',.78));};img.src=r.result;};r.readAsDataURL(file);}
+function capitalizeName(value){return String(value||'').replace(/(^|[\s-])([а-яёa-z])/gi,(m,space,letter)=>space+letter.toUpperCase());}
+function formatPhone(value){ const raw=String(value||''); const trimmed=raw.trim(); if(/^\+\s*(?!7(?:\D|$))/.test(trimmed)) return trimmed; let digits=raw.replace(/\D/g,''); if(!digits)return ''; if(digits[0]==='8')digits='7'+digits.slice(1); if(digits[0]!=='7')digits='7'+digits; digits=digits.slice(0,11); let out='+7'; if(digits.length>1)out+=' '+digits.slice(1,4); if(digits.length>4)out+=' '+digits.slice(4,7); if(digits.length>7)out+=' '+digits.slice(7,9); if(digits.length>9)out+=' '+digits.slice(9,11); return out; }
+
+function applyTheme(theme){ const light=theme==='light'; document.body.classList.toggle('light-theme',light); $('themeToggle').textContent=light?'☀️':'🌙'; $('themeToggle').setAttribute('aria-label',light?'Включить темную тему':'Включить светлую тему'); try{localStorage.setItem('bambooTheme',light?'light':'dark');}catch(e){} }
+function initTheme(){ let theme='dark'; try{theme=localStorage.getItem('bambooTheme')||'dark';}catch(e){} applyTheme(theme); $('themeToggle').onclick=()=>applyTheme(document.body.classList.contains('light-theme')?'dark':'light'); }
+ $('addWallBtn').onclick=addWall; $('managerSelect').value=localStorage.getItem('selectedManager')||'Менеджер 1'; $('managerSelect').onchange=()=>{localStorage.setItem('selectedManager',$('managerSelect').value);calculate();}; $('copyPhoneBtn').onclick=()=>{const phone=$('clientPhone').value;if(phone)navigator.clipboard?.writeText(phone).then(()=>openModal('Готово','Телефон скопирован.'));}; $('newClientBtn').onclick=()=>{ $('clientName').value='';$('clientPhone').value='';$('clientPhone2').value='';$('description').value='';$('clientStatus').value='Новый';$('panelSelect').selectedIndex=0;$('louverSelect').value='';document.querySelectorAll('[data-service]').forEach(x=>x.checked=false);$('innerCorner').checked=false;$('outerCorner').checked=false;$('lProfile').checked=false;$('led').checked=false;$('autoMaterials').checked=false;$('hasLift').checked=false;$('hiddenLouverDoor').checked=false;$('prepElectrician').checked=false;$('prepPlumber').checked=false;$('prepWalls').checked=false;$('liftHours').value='';$('radialAngles').value='';$('windows').value='';$('doors').value='';$('windowPerimeter').value='';$('doorPerimeter').value='';$('floorArea').value='';$('wallList').innerHTML='<div class="wall-row" data-wall-id="1"><div class="field"><label for="wallLength">Стена 1 · длина L, м</label><input id="wallLength" data-wall-length type="number" min="0" step="0.01" placeholder="0"></div><div class="field"><label for="wallHeight">Высота H, м</label><input id="wallHeight" data-wall-height type="number" min="0" step="0.01" placeholder="0"></div><div class="wall-actions"><button type="button" class="btn small secondary remove-wall hidden">×</button></div></div>';$('photoPreview').src='';$('photoPreview').classList.remove('visible');$('pdfPhotoImage').src='';$('pdfPhotoSection').classList.add('hidden');$('photoPdfTitle').classList.add('hidden');$('photoStatus').textContent='';document.querySelector('input[value="floor"]').checked=true;invoiceRequested=false;updateInvoiceButton();ensureWalls();$('wallList').querySelectorAll('input').forEach(input=>input.addEventListener('input',calculate));toggleMode();updatePriceLabels();save();calculate();}; ensureWalls(); $('standardWindowBtn').onclick=()=>{$('windows').value=1;$('windowPerimeter').value=4.8;calculate();}; $('standardDoorBtn').onclick=()=>{$('doors').value=1;$('doorPerimeter').value=5.4;calculate();}; $('calculateBtn').onclick=calculateAndSpeak; $('resetBtn').onclick=resetData; $('historyBtn').onclick=showHistory; $('invoiceBtn').onclick=showInvoice; updateInvoiceButton(); $('copyBtn').onclick=()=>{if(navigator.vibrate)navigator.vibrate(50); const text=buildClientText(calculate()); navigator.clipboard?.writeText(text).then(()=>openModal('Готово','Сообщение скопировано для WhatsApp.')).catch(()=>openModal('Текст расчета',text));}; $('whatsappBtn').onclick=sendWhatsApp; $('printBtn').onclick=()=>window.print();
+$('fileInput').onchange=e=>{const file=e.target.files?.[0];if(!file)return;const name=file.name.toLowerCase();if(/\.(mp3|m4a|wav|aac|ogg)$/.test(name)||file.type.startsWith('audio/')){transcribeAudioFile(file);}else if(name.endsWith('.txt')||file.type==='text/plain'){const reader=new FileReader();reader.onload=()=>{$('description').value=String(reader.result||'');parseText();};reader.onerror=()=>openModal('Ошибка файла','Не удалось прочитать текстовый файл.');reader.readAsText(file);}else{openModal('Формат не поддерживается','Выберите текстовый файл или аудиофайл MP3, M4A, WAV, AAC либо OGG.');}e.target.value='';};
+const oldVoiceHandler=$('voiceBtn').onclick; $('voiceBtn').onclick=()=>{const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;if(!Speech){openModal('Голосовой ввод','Ваш браузер не поддерживает Web Speech API.');return;} const rec=new Speech();rec.lang='ru-RU';rec.onresult=e=>{const transcript=e.results[0][0].transcript; $('description').value=transcript; const command=transcript.toLowerCase(); if(command.includes('рассчитать'))calculateAndSpeak(); else if(command.includes('сбросить')){document.querySelectorAll('input,textarea').forEach(el=>{if(el.type==='checkbox')el.checked=false;else if(el.type!=='radio')el.value='';}); document.querySelector('input[value="floor"]').checked=true;toggleMode();calculate();} else parseText();};rec.start();};
+
+ $('priceSettingsBtn').onclick=showPriceSettings; function showPhotoChooser(){ $('modalRoot').className='modal-backdrop'; $('modalRoot').innerHTML='<div class="modal"><h2>Фото объекта</h2><p>Выберите источник фотографии.</p><div class="actions"><button class="btn primary" id="takePhotoBtn">Сделать фото (камера)</button><button class="btn secondary" id="galleryPhotoBtn">Выбрать из галереи</button><button class="btn secondary" id="closePhotoChooser">Закрыть</button></div></div>'; $('takePhotoBtn').onclick=()=>{$('modalRoot').className='hidden';$('photoCameraInput').click();}; $('galleryPhotoBtn').onclick=()=>{$('modalRoot').className='hidden';$('photoInput').click();}; $('closePhotoChooser').onclick=()=>{$('modalRoot').className='hidden';}; } $('photoBtn').onclick=showPhotoChooser; $('photoInput').onchange=e=>handlePhoto(e.target.files[0]); $('photoCameraInput').onchange=e=>handlePhoto(e.target.files[0]); $('clientName').addEventListener('input',e=>{const pos=e.target.selectionStart;e.target.value=capitalizeName(e.target.value);e.target.setSelectionRange(pos,pos);}); $('clientPhone').addEventListener('input',e=>{e.target.value=formatPhone(e.target.value);}); $('clientPhone2').addEventListener('input',e=>{e.target.value=formatPhone(e.target.value);}); setInterval(save,5000);
+fillSelects(); renderServices(); restore(); initTheme(); updateRangeLabels(); calculate(); initLongPressTooltips();
+</script>
+</body>
+</html>
